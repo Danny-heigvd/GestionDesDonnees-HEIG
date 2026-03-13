@@ -44,7 +44,7 @@ CREATE TABLE signalement (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     objet VARCHAR(200),
-    description TEXT,
+    description VARCHAR(200),
     id_type_signalement INTEGER NOT NULL REFERENCES type_signalement(id),
     id_source_signalement INTEGER NOT NULL REFERENCES source_signalement(id)
 );
@@ -70,7 +70,7 @@ CREATE TABLE intervention (
     date DATE NOT NULL,
     duree INT,
     cout DECIMAL(10,2),
-    remarque TEXT,
+    remarque VARCHAR(200),
     id_signalement INTEGER NOT NULL REFERENCES signalement(id),
     id_type_intervention INTEGER NOT NULL REFERENCES type_intervention(id),
     id_technicien INTEGER NOT NULL REFERENCES technicien(id),

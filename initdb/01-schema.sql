@@ -10,7 +10,7 @@ CREATE TABLE fournisseurs (
 CREATE TABLE mobilier (
     id SERIAL PRIMARY KEY,
     date_installation DATE,
-    remarque TEXT,
+    remarque VARCHAR(150),
    id_fournisseur INTEGER NOT NULL REFERENCES fournisseurs(id),
     id_type_mobilier INTEGER NOT NULL REFERENCES type_mobilier(id),
     id_lieu INTEGER NOT NULL REFERENCES lieu(id),

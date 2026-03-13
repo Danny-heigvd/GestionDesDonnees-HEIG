@@ -54,16 +54,11 @@ CREATE TABLE mobilier (
     id SERIAL PRIMARY KEY,
     date_installation DATE,
     remarque TEXT,
-    fk_fournisseur INT NOT NULL,
-    fk_type_mobilier INT NOT NULL,
-    fk_lieu INT NOT NULL,
-    fk_etat INT NOT NULL,
-    fk_materiau INT NOT NULL,
-    FOREIGN KEY (fk_fournisseur) REFERENCES fournisseurs(id_fournisseur),
-    FOREIGN KEY (fk_type_mobilier) REFERENCES type_mobilier(id_type_mobilier),
-    FOREIGN KEY (fk_lieu) REFERENCES lieu(id_lieu),
-    FOREIGN KEY (fk_etat) REFERENCES etat(id_etat),
-    FOREIGN KEY (fk_materiau) REFERENCES materiau(id_materiau)
+   id_fournisseur INTEGERNOTNULLREFERENCES fournisseurs(id),
+    id_type_mobilier INTEGER NOT NULL REFERENCES type_mobilier(id),
+    id_lieu INTEGER NOT NULL REFERENCES lieu(id),
+    id_etat INTEGER NOT NULL REFERENCES etat(id),
+    id_materiau INTEGER NOT NULL REFERENCES materiau(id)
 );
  
 CREATE TABLE signalement (
@@ -71,26 +66,21 @@ CREATE TABLE signalement (
     date DATE NOT NULL,
     objet VARCHAR(200),
     description TEXT,
-    fk_type_signalement INT NOT NULL,
-    fk_source_signalement INT NOT NULL,
-    FOREIGN KEY (fk_type_signalement) REFERENCES type_signalement(id_type_signalement),
-    FOREIGN KEY (fk_source_signalement) REFERENCES source_signalement(id_source_signalement)
+    id_type_signalement INTEGER NOT NULL REFERENCES type_signalement(id),
+    id_source_signalement INTEGER NOT NULL REFERENCES source_signalement(id)
 );
  
 CREATE TABLE mobilier_signalement (
-    fk_mobilier INT NOT NULL,
-    fk_signalement INT NOT NULL,
-    PRIMARY KEY (fk_mobilier, fk_signalement),
-    FOREIGN KEY (fk_mobilier) REFERENCES mobilier(id_mobilier),
-    FOREIGN KEY (fk_signalement) REFERENCES signalement(id_signalement)
+    id SERIAL PRIMARY KEY,
+      id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
 );
  
 CREATE TABLE technicien (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(150) NOT NULL,
     technicien_contrat VARCHAR(100),
-    fk_technicien_contrat INT NOT NULL,
-    FOREIGN KEY (fk_technicien_contrat) REFERENCES technicien_contrat(id_technicien_contrat)
+    id_technicien_contrat INTEGER NOT NULL REFERENCES technicien_contrat(id)
 );
  
 CREATE TABLE intervention (
@@ -99,10 +89,7 @@ CREATE TABLE intervention (
     duree INT,
     cout DECIMAL(10,2),
     remarque TEXT,
-    fk_signalement INT NOT NULL,
-    fk_type_intervention INT NOT NULL,
-    fk_technicien INT NOT NULL,
-    FOREIGN KEY (fk_signalement) REFERENCES signalement(id_signalement),
-    FOREIGN KEY (fk_type_intervention) REFERENCES type_intervention(id_type_intervention),
-    FOREIGN KEY (fk_technicien) REFERENCES technicien(id_technicien)
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id_signalement),
+    id_type_intervention INTEGER NOT NULL REFERENCES type_intervention(id),
+    id_technicien INTEGER NOT NULL REFERENCES technicien(id)
 );

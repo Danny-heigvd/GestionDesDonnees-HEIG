@@ -15,7 +15,7 @@ CREATE TABLE staging.inventaire (
   remarques         TEXT
 );
 
-COPY staging.inventaire_mobilier
+COPY staging.inventaire
 FROM '/data/inventaire_mobilier.csv'
 WITH (FORMAT csv, HEADER true,
-      DELIMITER ',', ENCODING 'UTF8');
+      DELIMITER ';', ENCODING 'UTF8');

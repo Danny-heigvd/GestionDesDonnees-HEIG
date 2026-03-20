@@ -66,6 +66,19 @@ CREATE TABLE type_intervention (
     libelle VARCHAR(100) NOT NULL
 );
 
+CREATE TABLE technicien_contrat (
+    id SERIAL PRIMARY KEY,
+    date_debut DATE NOT NULL,
+    date_fin DATE
+);
+
+CREATE TABLE technicien (
+    id SERIAL PRIMARY KEY,
+    nom VARCHAR(150) NOT NULL,
+    id_technicien_contrat INTEGER NOT NULL REFERENCES technicien_contrat(id)
+);
+ 
+
 CREATE TABLE intervention (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -78,21 +91,12 @@ CREATE TABLE intervention (
     id_mobilier INTEGER NOT NULL REFERENCES mobilier(id)
 );
 
-CREATE TABLE technicien (
-    id SERIAL PRIMARY KEY,
-    nom VARCHAR(150) NOT NULL,
-    id_technicien_contrat INTEGER NOT NULL REFERENCES technicien_contrat(id)
-);
- 
-CREATE TABLE technicien_contrat (
-    id SERIAL PRIMARY KEY,
-    date_debut DATE NOT NULL,
-    date_fin DATE
-);
+
+
 
 CREATE TABLE mobilier_signalement (
     id SERIAL PRIMARY KEY,
       id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
-    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id)
 );
  

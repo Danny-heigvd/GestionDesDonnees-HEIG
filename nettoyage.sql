@@ -1,7 +1,7 @@
 -- téléphone normalisé (version simple)
 SELECT 
     CASE
-        WHEN telephone LIKE '+41%' THEN '0' 
+        WHEN telephone LIKE '+41%' THEN REPLACE(telephone, '+41 ', '0')
         ELSE
             TRIM(telephone)
     END AS telephone
@@ -13,7 +13,7 @@ SELECT
         WHEN email NOT LIKE '%@%' THEN 'inconnu'
         ELSE TRIM(email)
     END AS email
-FROM fournisseurs
+FROM staging.fournisseurs
 ;
 -- =============================================================================
 -- 2. INTERVENTIONS
@@ -24,7 +24,7 @@ SELECT
 CASE WHEN date LIKE '%.%.%' THEN TO_DATE(date, 'DD.MM.YYYY')::TEXT
 ELSE date
 END AS date_normalisee
-From intervention;
+From staging.interventionS;
 
 
 SELECT
@@ -37,26 +37,27 @@ CASE
     WHEN duree = 'une matinée' THEN 240
     WHEN duree = 'une journée' THEN 480
     ELSE NULL
-END AS duree_minutes;
+END AS duree_minutes
+FROM staging.interventions;
 
 SELECT
 CASE 
-    WHEN cout = 'gratuit' THEN 0
-    WHEN cout = 'garantie' THEN 0
-    WHEN TRIM(cout) = '' THEN NULL
-    ELSE cout::NUMERIC
+    WHEN cout_materiel = 'gratuit' THEN 0
+    WHEN cout_materiel = 'garantie' THEN 0
+    WHEN TRIM(cout_materiel) = '' THEN NULL
+    ELSE cout_materiel::NUMERIC
 END AS cout_chf
-FROM intervention;
+FROM interventions;
 
 SELECT 
-SET cout_materiel_chf = cout_materiel::NUMERIC
+SET cout_materiel = cout_materiel::NUMERIC
 ELSE NULL
-FROM intervention;
+FROM staging.intervention;
 
 -- 2.5 Normaliser la casse de type_intervention
 SELECT
 SET type_intervention = LOWER(TRIM(type_intervention))
-FROM intervention;
+FROM staging.intervention;
 
 -- =============================================================================
 -- 3. INVENTAIRE_MOBILIER
@@ -104,7 +105,7 @@ SELECT DISTINCT (CASE LOWER(TRIM(type))
 
         ELSE LOWER(TRIM(type))
         END) AS type_normalise
-from staging.inventaire;
+from inventaire;
 
 -- 3.3 Normaliser les dates d'installation
  
@@ -176,4 +177,4 @@ SELECT
         WHEN TRIM(date) LIKE '%.%.%' THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')::TEXT
         ELSE TRIM(date)
     END AS date
-FROM signalements;
+FROM staging.signalements;

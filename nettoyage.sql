@@ -24,9 +24,18 @@ SELECT
 from fournisseurs;
 
 -- 1.4 Valeur par défaut pour les contacts manquants
-UPDATE fournisseurs_contacts
-SET contact = 'inconnu'
-WHERE contact IS NULL;
+SELECT 
+    CASE
+        WHEN contact IS NULL OR TRIM(contact) = '' 
+            THEN 'inconnu'
+        ELSE 
+            CASE 
+                WHEN contact LIKE '%a' OR contact LIKE '%e' THEN 'Mme. '
+                ELSE 
+                    'M. '
+            END
+    END AS contact
+FROM fournisseurs;
 
 -- =============================================================================
 -- 2. INTERVENTIONS

@@ -1,11 +1,4 @@
-CREATE TABLE fournisseurs (
-    id SERIAL PRIMARY KEY,
-    entreprise VARCHAR(150),
-    contact VARCHAR(150),
-    telephone VARCHAR(30),
-    email VARCHAR(150),
-    remarques VARCHAR(150)
-);
+
  
 CREATE TABLE type_mobilier (
     id SERIAL PRIMARY KEY,
@@ -40,6 +33,15 @@ CREATE TABLE mobilier (
     id_materiau INTEGER NOT NULL REFERENCES materiau(id)
 );
 
+
+CREATE TABLE fournisseurs (
+    id SERIAL PRIMARY KEY,
+    entreprise VARCHAR(150),
+    contact VARCHAR(150),
+    telephone VARCHAR(30),
+    email VARCHAR(150),
+    remarques VARCHAR(150)
+);
 
 CREATE TABLE source_signalement (
     id SERIAL PRIMARY KEY,

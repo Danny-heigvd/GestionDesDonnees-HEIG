@@ -10,67 +10,48 @@ FROM staging.fournisseurs;
 SELECT 
     CASE
         WHEN email IS NULL OR TRIM(email) = '' THEN 'inconnu'
+        WHEN email NOT LIKE '%@%' THEN 'inconnu'
         ELSE TRIM(email)
     END AS email
-from fournisseurs
-
-
--- 1.3 Valeur par défaut pour les emails manquants
-SELECT 
-    CASE
-        WHEN remarque IS NULL OR TRIM(remarques) = '' THEN 'inconnu'
-        ELSE TRIM(remarques)
-    END AS remarque
-from fournisseurs;
-
--- 1.4 Valeur par défaut pour les contacts manquants
-SELECT 
-    CASE
-        WHEN contact IS NULL OR TRIM(contact) = '' 
-            THEN 'inconnu'
-        ELSE 
-            CASE 
-                WHEN contact LIKE '%a' OR contact LIKE '%e' THEN 'Mme. '
-                ELSE 
-                    'M. '
-            END
-    END AS contact
-FROM fournisseurs;
-
+FROM fournisseurs
+;
 -- =============================================================================
 -- 2. INTERVENTIONS
 -- =============================================================================
 
 -- 2.1 Normaliser les dates DD.MM.YYYY → YYYY-MM-DD
-UPDATE interventions
-SET date = CASE
-    WHEN date LIKE '%.%.%' THEN TO_DATE(date, 'DD.MM.YYYY')::TEXT
-END;
+SELECT
+CASE WHEN date LIKE '%.%.%' THEN TO_DATE(date, 'DD.MM.YYYY')::TEXT
+ELSE date
+END AS date_normalisee
+From intervention;
 
-UPDATE interventions SET duree_minutes =
-    CASE duree
-        WHEN '30 min'       THEN 30
-        WHEN '1h'           THEN 60
-        WHEN '1h30'         THEN 90
-        WHEN '2h'           THEN 120
-        WHEN '3h'           THEN 180
-        WHEN 'une matinée'  THEN 240
-        WHEN 'une journée'  THEN 480
-        ELSE NULL
-    END;
 
-UPDATE interventions
-SET cout_materiel_chf =
-    CASE
-        WHEN LOWER(TRIM(cout_materiel)) IN ('gratuit', 'garantie') THEN 0
-        WHEN TRIM(cout_materiel) = '' THEN NULL
-        ELSE cout_materiel::NUMERIC
-    END;
+SELECT
+CASE
+    WHEN duree = '30 min' THEN 30
+    WHEN duree = '1h' THEN 60
+    WHEN duree = '1h30' THEN 90
+    WHEN duree = '2h' THEN 120
+    WHEN duree = '3h' THEN 180
+    WHEN duree = 'une matinée' THEN 240
+    WHEN duree = 'une journée' THEN 480
+    ELSE NULL
+END AS duree_minutes;
 
-UPDATE interventions
+SELECT
+CASE 
+    WHEN cout = 'gratuit' THEN 0
+    WHEN cout = 'garantie' THEN 0
+    WHEN TRIM(cout) = '' THEN NULL
+    ELSE cout::NUMERIC
+END AS cout_chf
+FROM intervention;
+
+SELECT 
 SET cout_materiel_chf = cout_materiel::NUMERIC
-WHERE cout_materiel_chf IS NULL
-  AND TRIM(cout_materiel) <> '';
+ELSE NULL
+FROM intervention;
 
 -- 2.5 Normaliser la casse de type_intervention
 UPDATE interventions

@@ -1,15 +1,19 @@
 -- téléphone normalisé (version simple)
-FROM staging.fournisseurs_contacts
+SELECT 
     CASE
         WHEN telephone LIKE '+41%' THEN '0' 
         ELSE
             TRIM(telephone)
     END AS telephone
-
+FROM staging.fournisseurs;
     -- email
-UPDATE fournisseurs_contacts
-SET email = NULL
-WHERE email NOT LIKE '%@%';
+SELECT 
+    CASE
+        WHEN email IS NULL OR TRIM(email) = '' THEN 'inconnu'
+        ELSE TRIM(email)
+    END AS email
+from fournisseurs
+
 
 -- 1.3 Valeur par défaut pour les emails manquants
 UPDATE fournisseurs_contacts
@@ -72,6 +76,48 @@ WHERE remarques IS NULL;
 UPDATE inventaire_mobilier
 SET id = REPLACE(id, '_', '-')
 WHERE id LIKE '%\_%';
+
+
+
+SELECT DISTINCT (CASE LOWER(TRIM(type))
+
+        WHEN 'banc' THEN 'banc'
+        WHEN 'banc public' THEN 'banc'
+        WHEN 'banc bois' THEN 'banc'
+        WHEN 'banc métal' THEN 'banc'
+        WHEN 'banc metal' THEN 'banc'
+
+        WHEN 'poubelle' THEN 'poubelle'
+        WHEN 'corbeille' THEN 'poubelle'
+        WHEN 'poubelle tri' THEN 'poubelle'
+        WHEN 'poubelle recyclage' THEN 'poubelle'
+
+        WHEN 'fontaine' THEN 'fontaine'
+        WHEN 'fontaine publique' THEN 'fontaine'
+        WHEN 'fontaine eau' THEN 'fontaine'
+
+        WHEN 'borne ev' THEN 'borne ev'
+        WHEN 'borne recharge ev' THEN 'borne ev'
+        WHEN 'borne recharge' THEN 'borne ev'
+        WHEN 'borne électrique' THEN 'borne ev'
+
+        WHEN 'panneau' THEN 'panneau'
+        WHEN 'panneau info' THEN 'panneau'
+        WHEN 'panneau affichage' THEN 'panneau'
+        WHEN 'panneau signalisation' THEN 'panneau'
+
+        WHEN 'lampadaire' THEN 'lampadaire'
+        WHEN 'lampadaire led' THEN 'lampadaire'
+        WHEN 'lampadaire public' THEN 'lampadaire'
+
+        ELSE LOWER(TRIM(type))
+        END) AS type_normalise
+
+
+
+
+from staging.inventaire;
+
 
 -UPDATE inventaire_mobilier
 SET type =

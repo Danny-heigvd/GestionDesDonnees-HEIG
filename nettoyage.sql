@@ -54,21 +54,20 @@ ELSE NULL
 FROM intervention;
 
 -- 2.5 Normaliser la casse de type_intervention
-UPDATE interventions
-SET type_intervention = LOWER(TRIM(type_intervention));
-
--- 2.6 Valeur par défaut pour les remarques manquantes
-UPDATE interventions
-SET remarques = 'aucune'
-WHERE remarques IS NULL;
+SELECT
+SET type_intervention = LOWER(TRIM(type_intervention))
+FROM intervention;
 
 -- =============================================================================
 -- 3. INVENTAIRE_MOBILIER
 -- =============================================================================
 
-UPDATE inventaire_mobilier
-SET id = REPLACE(id, '_', '-')
-WHERE id LIKE '%\_%';
+SELECT
+    CASE
+        WHEN id LIKE '%\_%' THEN REPLACE(id, '_', '-')
+        ELSE id
+    END AS id
+FROM inventaire
 
 
 
@@ -105,107 +104,76 @@ SELECT DISTINCT (CASE LOWER(TRIM(type))
 
         ELSE LOWER(TRIM(type))
         END) AS type_normalise
-
-
-
-
 from staging.inventaire;
 
-
--UPDATE inventaire_mobilier
-SET type =
-    CASE LOWER(TRIM(type))
-
-        WHEN 'banc' THEN 'banc'
-        WHEN 'banc public' THEN 'banc'
-        WHEN 'banc bois' THEN 'banc'
-        WHEN 'banc métal' THEN 'banc'
-        WHEN 'banc metal' THEN 'banc'
-
-        WHEN 'poubelle' THEN 'poubelle'
-        WHEN 'corbeille' THEN 'poubelle'
-        WHEN 'poubelle tri' THEN 'poubelle'
-        WHEN 'poubelle recyclage' THEN 'poubelle'
-
-        WHEN 'fontaine' THEN 'fontaine'
-        WHEN 'fontaine publique' THEN 'fontaine'
-        WHEN 'fontaine eau' THEN 'fontaine'
-
-        WHEN 'borne ev' THEN 'borne ev'
-        WHEN 'borne recharge ev' THEN 'borne ev'
-        WHEN 'borne recharge' THEN 'borne ev'
-        WHEN 'borne électrique' THEN 'borne ev'
-
-        WHEN 'panneau' THEN 'panneau'
-        WHEN 'panneau info' THEN 'panneau'
-        WHEN 'panneau affichage' THEN 'panneau'
-        WHEN 'panneau signalisation' THEN 'panneau'
-
-        WHEN 'lampadaire' THEN 'lampadaire'
-        WHEN 'lampadaire led' THEN 'lampadaire'
-        WHEN 'lampadaire public' THEN 'lampadaire'
-
-        ELSE LOWER(TRIM(type))
-
-    END;
-
 -- 3.3 Normaliser les dates d'installation
-
---     Étape A : DD.MM.YYYY → YYYY-MM-DD
-UPDATE inventaire_mobilier
-SET date_installation =
+ 
+-- Étape A : DD.MM.YYYY → YYYY-MM-DD
+SELECT
     CASE
-        WHEN TRIM(date_installation) LIKE '%.%.%' 
+        WHEN TRIM(date_installation) LIKE '%.%.%'
             THEN TO_DATE(TRIM(date_installation), 'DD.MM.YYYY')
         ELSE date_installation::DATE
-    END;
-
---     Étape B : année seule → YYYY-01-01
-UPDATE inventaire_mobilier
-SET date_installation =
+    END AS date_installation
+FROM inventaire;
+ 
+-- Étape B : année seule → YYYY-01-01
+SELECT
     CASE
         WHEN TRIM(date_installation) LIKE '____'
             THEN TRIM(date_installation) || '-01-01'
         ELSE date_installation
-    END;
+    END AS date_installation
+FROM inventaire;
 
 --     Étape C : texte français → YYYY-MM-DD (1er du mois par convention)
-UPDATE inventaire_mobilier
-SET date_installation =
+USELECT
     CASE LOWER(TRIM(date_installation))
-
-        WHEN 'janvier 2019'   THEN '2019-01-01'
-        WHEN 'février 2015'   THEN '2015-02-01'
-        WHEN 'février 2020'   THEN '2020-02-01'
-        WHEN 'février 2021'   THEN '2021-02-01'
-        WHEN 'février 2023'   THEN '2023-02-01'
-        WHEN 'mars 2014'      THEN '2014-03-01'
-        WHEN 'mars 2023'      THEN '2023-03-01'
-        WHEN 'avril 2023'     THEN '2023-04-01'
-        WHEN 'mai 2017'       THEN '2017-05-01'
-        WHEN 'mai 2022'       THEN '2022-05-01'
-        WHEN 'mai 2023'       THEN '2023-05-01'
-        WHEN 'juin 2022'      THEN '2022-06-01'
-        WHEN 'juin 2023'      THEN '2023-06-01'
-        WHEN 'juillet 2016'   THEN '2016-07-01'
-        WHEN 'juillet 2022'   THEN '2022-07-01'
-        WHEN 'octobre 2013'   THEN '2013-10-01'
-        WHEN 'octobre 2021'   THEN '2021-10-01'
-        WHEN 'novembre 2019'  THEN '2019-11-01'
-        WHEN 'novembre 2021'  THEN '2021-11-01'
-        WHEN 'décembre 2016'  THEN '2016-12-01'
-        WHEN 'décembre 2021'  THEN '2021-12-01'
-        WHEN 'décembre 2022'  THEN '2022-12-01'
-
+        WHEN 'janvier 2019'   THEN '01-01-2019'
+        WHEN 'février 2015'   THEN '01-02-2015'
+        WHEN 'février 2020'   THEN '01-02-2020'
+        WHEN 'février 2021'   THEN '01-02-2021'
+        WHEN 'février 2023'   THEN '01-02-2023'
+        WHEN 'mars 2014'      THEN '01-03-2014'
+        WHEN 'mars 2023'      THEN '01-03-2023'
+        WHEN 'avril 2023'     THEN '01-04-2023'
+        WHEN 'mai 2017'       THEN '01-05-2017'
+        WHEN 'mai 2022'       THEN '01-05-2022'
+        WHEN 'mai 2023'       THEN '01-05-2023'
+        WHEN 'juin 2022'      THEN '01-06-2022'
+        WHEN 'juin 2023'      THEN '01-06-2023'
+        WHEN 'juillet 2016'   THEN '01-07-2016'
+        WHEN 'juillet 2022'   THEN '01-07-2022'
+        WHEN 'octobre 2013'   THEN '01-10-2013'
+        WHEN 'octobre 2021'   THEN '01-10-2021'
+        WHEN 'novembre 2019'  THEN '01-11-2019'
+        WHEN 'novembre 2021'  THEN '01-11-2021'
+        WHEN 'décembre 2016'  THEN '01-12-2016'
+        WHEN 'décembre 2021'  THEN '01-12-2021'
+        WHEN 'décembre 2022'  THEN '01-12-2022'
         ELSE date_installation
-    END;
-
+    END AS date_installation
+FROM inventaire;
 -- 3.4 Matériau manquant → 'inconnu'
-UPDATE inventaire_mobilier
-SET materiau = 'inconnu'
-WHERE materiau IS NULL;
-
+SELECT
+    CASE
+        WHEN materiau IS NULL THEN 'inconnu'
+        ELSE LOWER(TRIM(materiau))
+        END AS matériaux
+FROM inventaire;
+ 
+ 
 -- 3.5 Remarques manquantes → 'aucune'
-UPDATE inventaire_mobilier
-SET remarques = 'aucune'
-WHERE remarques IS NULL;
+SELECT
+    CASE
+        WHEN remarques IS NULL THEN 'aucune'
+        ELSE remarques
+    END AS remarques
+FROM inventaire;
+
+SELECT
+    CASE
+        WHEN TRIM(date) LIKE '%.%.%' THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')::TEXT
+        ELSE TRIM(date)
+    END AS date
+FROM signalements;

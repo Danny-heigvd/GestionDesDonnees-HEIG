@@ -16,9 +16,12 @@ from fournisseurs
 
 
 -- 1.3 Valeur par défaut pour les emails manquants
-UPDATE fournisseurs_contacts
-SET email = 'inconnu'
-WHERE email IS NULL;
+SELECT 
+    CASE
+        WHEN remarque IS NULL OR TRIM(remarques) = '' THEN 'inconnu'
+        ELSE TRIM(remarques)
+    END AS remarque
+from fournisseurs;
 
 -- 1.4 Valeur par défaut pour les contacts manquants
 UPDATE fournisseurs_contacts

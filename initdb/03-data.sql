@@ -1,39 +1,34 @@
-iNSERT INTO public.type_mobilier(libelle)
+-- 1. type_mobilier
+INSERT INTO public.type_mobilier(libelle)
 SELECT DISTINCT (CASE LOWER(TRIM(type))
-
         WHEN 'banc' THEN 'banc'
         WHEN 'banc public' THEN 'banc'
         WHEN 'banc bois' THEN 'banc'
         WHEN 'banc métal' THEN 'banc'
         WHEN 'banc metal' THEN 'banc'
-
         WHEN 'poubelle' THEN 'poubelle'
         WHEN 'corbeille' THEN 'poubelle'
         WHEN 'poubelle tri' THEN 'poubelle'
         WHEN 'poubelle recyclage' THEN 'poubelle'
-
         WHEN 'fontaine' THEN 'fontaine'
         WHEN 'fontaine publique' THEN 'fontaine'
         WHEN 'fontaine eau' THEN 'fontaine'
-
         WHEN 'borne ev' THEN 'borne ev'
         WHEN 'borne recharge ev' THEN 'borne ev'
         WHEN 'borne recharge' THEN 'borne ev'
         WHEN 'borne électrique' THEN 'borne ev'
-
         WHEN 'panneau' THEN 'panneau'
         WHEN 'panneau info' THEN 'panneau'
         WHEN 'panneau affichage' THEN 'panneau'
         WHEN 'panneau signalisation' THEN 'panneau'
-
         WHEN 'lampadaire' THEN 'lampadaire'
         WHEN 'lampadaire led' THEN 'lampadaire'
         WHEN 'lampadaire public' THEN 'lampadaire'
-
         ELSE LOWER(TRIM(type))
         END) AS type_normalise
 FROM staging.inventaire;
-
+ 
+-- 2. materiau
 INSERT INTO public.materiau(libelle)
 SELECT
     CASE
@@ -42,13 +37,37 @@ SELECT
     END
 FROM staging.inventaire;
 
-INSERT INTO public.fournisseurs(entreprise,telephone,email)
+INSERT INTO public.etat(libelle)
+SELECT
+    CASE
+        WHEN etat IS NULL THEN 'inconnu'
+        ELSE LOWER(TRIM(etat))
+    END
+FROM staging.inventaire;
+
+INSERT INTO public.lieu(nom, latitude, longitude)
+SELECT
+    CASE
+        WHEN lieu IS NULL THEN 'inconnu'
+        ELSE TRIM(lieu)
+    END,
+    CASE
+        WHEN latitude IS NULL THEN NULL
+        ELSE latitude::DECIMAL(9,6)
+    END,
+    CASE
+        WHEN longitude IS NULL THEN NULL
+        ELSE longitude::DECIMAL(9,6)
+    END
+FROM staging.inventaire;
+
+-- 5. fournisseurs
+INSERT INTO public.fournisseurs(entreprise, telephone, email)
 SELECT 
-entreprise,
+    entreprise,
     CASE
         WHEN telephone LIKE '+41%' THEN REPLACE(telephone, '+41 ', '0')
-        ELSE
-            TRIM(telephone)
+        ELSE TRIM(telephone)
     END AS telephone,
     CASE
         WHEN email IS NULL OR TRIM(email) = '' THEN 'inconnu'
@@ -56,22 +75,9 @@ entreprise,
         ELSE TRIM(email)
     END AS email
 FROM staging.fournisseurs;
-
-INSERT INTO public.signalement(date)
-SELECT
-    CASE
-        WHEN TRIM(date) LIKE '%.%.%' 
-            THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')
-        ELSE TRIM(date)::DATE
-    END
-FROM staging.signalements;
-
-INSERT INTO public.type_intervention(libelle)
-SELECT 
-    LOWER(TRIM(type_intervention))
-FROM staging.interventions;
-
-INSERT INTO public.mobilier(id,date_installation,remarques)
+ 
+-- 6. mobilier
+INSERT INTO public.mobilier(id, date_installation, remarques)
 SELECT
     CASE
         WHEN id LIKE '%\_%' THEN REPLACE(id, '_', '-')
@@ -80,19 +86,82 @@ SELECT
     CASE
         WHEN TRIM(date_installation) LIKE '%.%.%' 
             THEN TO_DATE(TRIM(date_installation), 'DD.MM.YYYY')
-
         WHEN TRIM(date_installation) LIKE '____'
             THEN (TRIM(date_installation) || '-01-01')::DATE
-
         ELSE NULL
     END,
     CASE
         WHEN remarques IS NULL THEN 'aucune'
         ELSE remarques
     END
+    JOIN public.fournisseurs f ON f.id = i.id_fournisseur
+    JOIN public.type_mobilier tm ON tm.id = i.id_type_mobilier
+    JOIN public.lieu l ON l.id = i.id_lieu
+    JOIN public.etat e ON e.id = i.id_etat
+    JOIN public.materiau m ON m.id = i.id_materiau,
 FROM staging.inventaire;
 
-INSERT INTO public.intervention(date,duree,cout_materiel)
+INSERT INTO public.source_signalement(nom)
+SELECT
+    CASE
+        WHEN source IS NULL THEN 'inconnu'
+        ELSE LOWER(TRIM(source))
+    END
+FROM staging.signalements;
+ 
+ INSERT INTO public.type_signalement(libelle)
+SELECT
+    CASE
+        WHEN type_signalement IS NULL THEN 'inconnu'
+        ELSE LOWER(TRIM(type_signalement))
+    END
+FROM staging.signalements;
+
+-- 9. signalement
+INSERT INTO public.signalement(date)
+SELECT
+    CASE
+        WHEN TRIM(date) LIKE '%.%.%' 
+            THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')
+        ELSE TRIM(date)::DATE
+    END
+FROM staging.signalements;
+ 
+-- 10. type_intervention
+INSERT INTO public.type_intervention(libelle)
+SELECT 
+    LOWER(TRIM(type_intervention))
+FROM staging.interventions;
+ 
+ INSERT INTO public.technicien_contrat(date_debut, date_fin)
+SELECT
+    CASE
+        WHEN TRIM(date_debut) LIKE '%.%.%'
+            THEN TO_DATE(TRIM(date_debut), 'DD.MM.YYYY')
+        WHEN date_debut IS NULL THEN NULL
+        ELSE TRIM(date_debut)::DATE
+    END,
+    CASE
+        WHEN TRIM(date_fin) LIKE '%.%.%'
+            THEN TO_DATE(TRIM(date_fin), 'DD.MM.YYYY')
+        WHEN date_fin IS NULL THEN NULL
+        ELSE TRIM(date_fin)::DATE
+    END
+FROM staging.techniciens;
+
+INSERT INTO public.technicien(nom, id_technicien_contrat)
+SELECT
+    CASE
+        WHEN nom IS NULL THEN 'inconnu'
+        ELSE TRIM(nom)
+    END,
+    tc.id
+FROM staging.techniciens st
+JOIN public.technicien_contrat tc
+    ON tc.date_debut = TO_DATE(TRIM(st.date_debut), 'DD.MM.YYYY');
+
+-- 13. intervention
+INSERT INTO public.intervention(date, duree, cout_materiel)
 SELECT
     CASE 
         WHEN date LIKE '%.%.%' 
@@ -117,8 +186,20 @@ SELECT
     END AS cout_chf
 FROM staging.interventions;
 
+INSERT INTO public.mobilier_signalement(id_mobilier, id_signalement, libelle)
+SELECT
+    CASE
+        WHEN st.objet IS NULL OR TRIM(st.objet) = '' THEN 'inconnu'
+        ELSE TRIM(st.objet)
+    END
+FROM staging.signalements st
+JOIN public.signalement s
+    ON s.date = st.date::DATE
+   AND s.objet = st.objet
+JOIN public.type_mobilier tm
+    ON LOWER(st.objet) LIKE '%' || tm.libelle || '%'
+JOIN public.mobilier m
+    ON m.id_type_mobilier = tm.id;
 
-
-
-Ce qu'il faut faire pour la prochaine fois !!! - transpser les tables, c'est a dire faire insert into la table mobilier par exemple et mettre select type from inventaire pour que la table mobilierde 1 existe et de 2 quelle est du contenu
+Ce qu'il faut faire pour la prochaine fois !!! - transferer les tables, c'est a dire faire insert into la table mobilier par exemple et mettre select type from inventaire pour que la table mobilierde 1 existe et de 2 quelle est du contenu
 il faut faire ca pour toutes les colonnes dont on a rien netoyer mais que donc les tables "finale", donc nos tables qu'on a créé, existe, ont du contenu et soit utilisable

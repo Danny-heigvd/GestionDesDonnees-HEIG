@@ -22,6 +22,15 @@ CREATE TABLE lieu (
     longitude DECIMAL(9,6)
 );
 
+CREATE TABLE fournisseurs (
+    id SERIAL PRIMARY KEY,
+    entreprise VARCHAR(150),
+    contact VARCHAR(150),
+    telephone VARCHAR(30),
+    email VARCHAR(150),
+    remarques VARCHAR(150)
+);
+
 CREATE TABLE mobilier (
     id SERIAL PRIMARY KEY,
     date_installation DATE,
@@ -31,16 +40,6 @@ CREATE TABLE mobilier (
     id_lieu INTEGER NOT NULL REFERENCES lieu(id),
     id_etat INTEGER NOT NULL REFERENCES etat(id),
     id_materiau INTEGER NOT NULL REFERENCES materiau(id)
-);
-
-
-CREATE TABLE fournisseurs (
-    id SERIAL PRIMARY KEY,
-    entreprise VARCHAR(150),
-    contact VARCHAR(150),
-    telephone VARCHAR(30),
-    email VARCHAR(150),
-    remarques VARCHAR(150)
 );
 
 CREATE TABLE source_signalement (
@@ -98,7 +97,8 @@ CREATE TABLE intervention (
 
 CREATE TABLE mobilier_signalement (
     id SERIAL PRIMARY KEY,
-      id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
-    id_signalement INTEGER NOT NULL REFERENCES signalement(id)
+    id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
+    libelle VARCHAR(100) NOT NULL
 );
  

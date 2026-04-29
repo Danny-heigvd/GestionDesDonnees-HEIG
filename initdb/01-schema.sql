@@ -99,6 +99,5 @@ CREATE TABLE mobilier_signalement (
     id SERIAL PRIMARY KEY,
     id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
     id_signalement INTEGER NOT NULL REFERENCES signalement(id),
-    libelle VARCHAR(100) NOT NULL
 );
  

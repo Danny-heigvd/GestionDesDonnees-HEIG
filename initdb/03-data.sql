@@ -94,11 +94,10 @@ SELECT
         WHEN remarques IS NULL THEN 'aucune'
         ELSE remarques
     END
-    JOIN public.fournisseurs f ON f.id = i.id_fournisseur
-    JOIN public.type_mobilier tm ON tm.id = i.id_type_mobilier
-    JOIN public.lieu l ON l.id = i.id_lieu
-    JOIN public.etat e ON e.id = i.id_etat
-    JOIN public.materiau m ON m.id = i.id_materiau,
+    LEFT JOIN public.type_mobilier tm ON tm.libelle = i.type
+    LEFT JOIN public.materiau m ON m.libelle = i.materiau
+    LEFT JOIN public.etat e ON e.libelle = i.etat
+    LEFT JOIN public.lieu l ON l.nom = i.lieu
 FROM staging.inventaire;
 
 INSERT INTO public.source_signalement(nom)
@@ -125,6 +124,8 @@ SELECT
             THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')
         ELSE TRIM(date)::DATE
     END
+    LEFT JOIN public.type_signalement ts ON ts.libelle = st.objet
+    LEFT JOIN public.source_signalement ss ON ss.nom = st.signale_par,
 FROM staging.signalements;
  
 -- 10. type_intervention
@@ -155,11 +156,8 @@ SELECT
         WHEN nom IS NULL THEN 'inconnu'
         ELSE TRIM(nom)
     END,
-    tc.id
-FROM staging.techniciens st
-JOIN public.technicien_contrat tc
-    ON tc.date_debut = TO_DATE(TRIM(st.date_debut), 'DD.MM.YYYY');
-
+    LEFT JOIN public.technicien_contrat tc ON tc.date_debut = st.date_debut,
+FROM staging.techniciens;
 -- 13. intervention
 INSERT INTO public.intervention(date, duree, cout_materiel)
 SELECT
@@ -183,7 +181,8 @@ SELECT
         WHEN cout_materiel = 'garantie' THEN 0
         WHEN TRIM(cout_materiel) = '' THEN NULL
         ELSE cout_materiel::NUMERIC
-    END AS cout_chf
+    END AS cout_chf,
+    LEFT JOIN public.type_intervention ti ON ti.libelle = i.type_intervention,
 FROM staging.interventions;
 
 INSERT INTO public.mobilier_signalement(id_mobilier, id_signalement, libelle)
@@ -191,15 +190,10 @@ SELECT
     CASE
         WHEN st.objet IS NULL OR TRIM(st.objet) = '' THEN 'inconnu'
         ELSE TRIM(st.objet)
-    END
-FROM staging.signalements st
-JOIN public.signalement s
-    ON s.date = st.date::DATE
-   AND s.objet = st.objet
-JOIN public.type_mobilier tm
-    ON LOWER(st.objet) LIKE '%' || tm.libelle || '%'
-JOIN public.mobilier m
-    ON m.id_type_mobilier = tm.id;
+    END,
+    LEFT JOIN public.signalement s ON s.objet = st.objet,
+    LEFT JOIN public.mobilier m ON m.id_type_mobilier = tm.id,
+FROM staging.signalements;
 
 Ce qu'il faut faire pour la prochaine fois !!! - transferer les tables, c'est a dire faire insert into la table mobilier par exemple et mettre select type from inventaire pour que la table mobilierde 1 existe et de 2 quelle est du contenu
 il faut faire ca pour toutes les colonnes dont on a rien netoyer mais que donc les tables "finale", donc nos tables qu'on a créé, existe, ont du contenu et soit utilisable

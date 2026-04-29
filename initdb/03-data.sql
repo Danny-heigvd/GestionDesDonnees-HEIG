@@ -195,5 +195,3 @@ SELECT
     LEFT JOIN public.mobilier m ON m.id_type_mobilier = tm.id,
 FROM staging.signalements;
 
-Ce qu'il faut faire pour la prochaine fois !!! - transferer les tables, c'est a dire faire insert into la table mobilier par exemple et mettre select type from inventaire pour que la table mobilierde 1 existe et de 2 quelle est du contenu
-il faut faire ca pour toutes les colonnes dont on a rien netoyer mais que donc les tables "finale", donc nos tables qu'on a créé, existe, ont du contenu et soit utilisable

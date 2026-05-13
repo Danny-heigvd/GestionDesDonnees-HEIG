@@ -1,3 +1,4 @@
+-- Active: 1765282818027@@127.0.0.1@5436
 -- 1. type_mobilier
 INSERT INTO public.type_mobilier(libelle)
 SELECT DISTINCT (CASE LOWER(TRIM(type))
@@ -133,22 +134,6 @@ INSERT INTO public.type_intervention(libelle)
 SELECT 
     LOWER(TRIM(type_intervention))
 FROM staging.interventions;
- 
- INSERT INTO public.technicien_contrat(date_debut, date_fin)
-SELECT
-    CASE
-        WHEN TRIM(date_debut) LIKE '%.%.%'
-            THEN TO_DATE(TRIM(date_debut), 'DD.MM.YYYY')
-        WHEN date_debut IS NULL THEN NULL
-        ELSE TRIM(date_debut)::DATE
-    END,
-    CASE
-        WHEN TRIM(date_fin) LIKE '%.%.%'
-            THEN TO_DATE(TRIM(date_fin), 'DD.MM.YYYY')
-        WHEN date_fin IS NULL THEN NULL
-        ELSE TRIM(date_fin)::DATE
-    END
-FROM staging.techniciens;
 
 INSERT INTO public.technicien(nom, id_technicien_contrat)
 SELECT
@@ -156,7 +141,6 @@ SELECT
         WHEN nom IS NULL THEN 'inconnu'
         ELSE TRIM(nom)
     END,
-    LEFT JOIN public.technicien_contrat tc ON tc.date_debut = st.date_debut,
 FROM staging.techniciens;
 -- 13. intervention
 INSERT INTO public.intervention(date, duree, cout_materiel)

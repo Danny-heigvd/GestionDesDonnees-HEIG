@@ -34,7 +34,7 @@ CREATE TABLE fournisseurs (
 CREATE TABLE mobilier (
     id SERIAL PRIMARY KEY,
     date_installation DATE,
-    remarque VARCHAR(150),
+    remarques VARCHAR(150),
    id_fournisseur INTEGER NOT NULL REFERENCES fournisseurs(id),
     id_type_mobilier INTEGER NOT NULL REFERENCES type_mobilier(id),
     id_lieu INTEGER NOT NULL REFERENCES lieu(id),
@@ -49,7 +49,8 @@ CREATE TABLE source_signalement (
  
 CREATE TABLE type_signalement (
     id SERIAL PRIMARY KEY,
-    libelle VARCHAR(100) NOT NULL
+    urgence VARCHAR(50),
+    statut  VARCHAR(50)
 );
 
 CREATE TABLE signalement (

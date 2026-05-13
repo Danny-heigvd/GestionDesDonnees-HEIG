@@ -62,4 +62,17 @@ CREATE TABLE staging.signalements (
 COPY staging.signalements
 FROM '/data/signalements.csv'
 WITH (FORMAT csv, HEADER true,
-      DELIMITER ';', ENCODING 'UTF8');              
+      DELIMITER ';', ENCODING 'UTF8');        
+
+
+CREATE TABLE staging.fournisseur_inventaire (
+    id_inventaire TEXT,
+    type          TEXT,
+    materiau      TEXT,
+    entreprise    TEXT
+);
+
+COPY staging.fournisseur_inventaire
+FROM '/data/fournisseur_inventaire.csv'
+WITH (FORMAT csv, HEADER true,
+      DELIMITER ';', ENCODING 'UTF8');      

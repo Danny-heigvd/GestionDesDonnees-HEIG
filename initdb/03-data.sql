@@ -78,7 +78,7 @@ SELECT
 FROM staging.fournisseurs;
  
 -- 6. mobilier
-INSERT INTO public.mobilier(id, date_installation, remarques)
+INSERT INTO public.mobilier(id, date_installation, remarques, id_fournisseur, id_type_mobilier, id_lieu, id_etat, id_materiau)
 SELECT
     CASE
         WHEN id LIKE '%\_%' THEN REPLACE(id, '_', '-')
@@ -94,7 +94,15 @@ SELECT
     CASE
         WHEN remarques IS NULL THEN 'aucune'
         ELSE remarques
-    END
+    END,
+    fo.id AS id_fournisseur,
+    tm.id AS id_type_mobilier,
+    l.id AS id_lieu,
+    e.id AS id_etat,
+    m.id AS id_materiau
+    
+    LEFT JOIN staging.fournisseur_inventaire fi ON fi.id_inventaire = inv.id
+    LEFT JOIN public.fournisseurs            fo ON fo.entreprise    = fi.entreprise
     LEFT JOIN public.type_mobilier tm ON tm.libelle = i.type
     LEFT JOIN public.materiau m ON m.libelle = i.materiau
     LEFT JOIN public.etat e ON e.libelle = i.etat

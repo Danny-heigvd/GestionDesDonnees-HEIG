@@ -1,4 +1,4 @@
--- Active: 1765282818027@@127.0.0.1@5436
+-- Active: 1773414820841@@127.0.0.1@5438@service_technique
 -- 1. type_mobilier
 INSERT INTO public.type_mobilier(libelle)
 SELECT DISTINCT (CASE LOWER(TRIM(type))
@@ -37,7 +37,7 @@ SELECT
         ELSE LOWER(TRIM(materiau))
     END
 FROM staging.inventaire;
-
+ 
 INSERT INTO public.etat(libelle)
 SELECT
     CASE
@@ -45,7 +45,7 @@ SELECT
         ELSE LOWER(TRIM(etat))
     END
 FROM staging.inventaire;
-
+ 
 INSERT INTO public.lieu(nom, latitude, longitude)
 SELECT
     CASE
@@ -61,10 +61,10 @@ SELECT
         ELSE longitude::DECIMAL(9,6)
     END
 FROM staging.inventaire;
-
+ 
 -- 5. fournisseurs
 INSERT INTO public.fournisseurs(entreprise, telephone, email)
-SELECT 
+SELECT
     entreprise,
     CASE
         WHEN telephone LIKE '+41%' THEN REPLACE(telephone, '+41 ', '0')
@@ -79,13 +79,16 @@ FROM staging.fournisseurs;
  
 -- 6. mobilier
 INSERT INTO public.mobilier(id, date_installation, remarques, id_fournisseur, id_type_mobilier, id_lieu, id_etat, id_materiau)
+
+
+
 SELECT
     CASE
         WHEN id LIKE '%\_%' THEN REPLACE(id, '_', '-')
         ELSE id
     END,
     CASE
-        WHEN TRIM(date_installation) LIKE '%.%.%' 
+        WHEN TRIM(date_installation) LIKE '%.%.%'
             THEN TO_DATE(TRIM(date_installation), 'DD.MM.YYYY')
         WHEN TRIM(date_installation) LIKE '____'
             THEN (TRIM(date_installation) || '-01-01')::DATE
@@ -100,15 +103,15 @@ SELECT
     l.id AS id_lieu,
     e.id AS id_etat,
     m.id AS id_materiau
-    
+
     LEFT JOIN staging.fournisseur_inventaire fi ON fi.id_inventaire = inv.id
-    LEFT JOIN public.fournisseurs            fo ON fo.entreprise    = fi.entreprise
+    LEFT JOIN public.fournisseurs fo ON fo.entreprise = fi.entreprise
     LEFT JOIN public.type_mobilier tm ON tm.libelle = i.type
     LEFT JOIN public.materiau m ON m.libelle = i.materiau
     LEFT JOIN public.etat e ON e.libelle = i.etat
     LEFT JOIN public.lieu l ON l.nom = i.lieu
 FROM staging.inventaire;
-
+ 
 INSERT INTO public.source_signalement(nom)
 SELECT
     CASE
@@ -124,12 +127,12 @@ SELECT
         ELSE LOWER(TRIM(type_signalement))
     END
 FROM staging.signalements;
-
+ 
 -- 9. signalement
 INSERT INTO public.signalement(date)
 SELECT
     CASE
-        WHEN TRIM(date) LIKE '%.%.%' 
+        WHEN TRIM(date) LIKE '%.%.%'
             THEN TO_DATE(TRIM(date), 'DD.MM.YYYY')
         ELSE TRIM(date)::DATE
     END
@@ -139,10 +142,10 @@ FROM staging.signalements;
  
 -- 10. type_intervention
 INSERT INTO public.type_intervention(libelle)
-SELECT 
+SELECT
     LOWER(TRIM(type_intervention))
 FROM staging.interventions;
-
+ 
 INSERT INTO public.technicien(nom, id_technicien_contrat)
 SELECT
     CASE
@@ -153,8 +156,8 @@ FROM staging.techniciens;
 -- 13. intervention
 INSERT INTO public.intervention(date, duree, cout_materiel)
 SELECT
-    CASE 
-        WHEN date LIKE '%.%.%' 
+    CASE
+        WHEN date LIKE '%.%.%'
             THEN TO_DATE(date, 'DD.MM.YYYY')
         ELSE date::DATE
     END,
@@ -168,7 +171,7 @@ SELECT
         WHEN duree = 'une journée' THEN 480
         ELSE NULL
     END,
-    CASE 
+    CASE
         WHEN cout_materiel = 'gratuit' THEN 0
         WHEN cout_materiel = 'garantie' THEN 0
         WHEN TRIM(cout_materiel) = '' THEN NULL
@@ -176,7 +179,7 @@ SELECT
     END AS cout_chf,
     LEFT JOIN public.type_intervention ti ON ti.libelle = i.type_intervention,
 FROM staging.interventions;
-
+ 
 INSERT INTO public.mobilier_signalement(id_mobilier, id_signalement, libelle)
 SELECT
     CASE
@@ -186,4 +189,3 @@ SELECT
     LEFT JOIN public.signalement s ON s.objet = st.objet,
     LEFT JOIN public.mobilier m ON m.id_type_mobilier = tm.id,
 FROM staging.signalements;
-

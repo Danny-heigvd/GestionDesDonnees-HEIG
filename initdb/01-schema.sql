@@ -1,5 +1,3 @@
-
- 
 CREATE TABLE type_mobilier (
     id SERIAL PRIMARY KEY,
     libelle VARCHAR(100) NOT NULL
@@ -21,7 +19,7 @@ CREATE TABLE lieu (
     latitude DECIMAL(9,6),
     longitude DECIMAL(9,6)
 );
-
+ 
 CREATE TABLE fournisseurs (
     id SERIAL PRIMARY KEY,
     entreprise VARCHAR(150),
@@ -30,9 +28,10 @@ CREATE TABLE fournisseurs (
     email VARCHAR(150),
     remarques VARCHAR(150)
 );
-
+ 
 CREATE TABLE mobilier (
     id SERIAL PRIMARY KEY,
+    old_id VARCHAR(50) UNIQUE,
     date_installation DATE,
     remarques VARCHAR(150),
    id_fournisseur INTEGER NOT NULL REFERENCES fournisseurs(id),
@@ -41,7 +40,7 @@ CREATE TABLE mobilier (
     id_etat INTEGER NOT NULL REFERENCES etat(id),
     id_materiau INTEGER NOT NULL REFERENCES materiau(id)
 );
-
+ 
 CREATE TABLE source_signalement (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(100) NOT NULL
@@ -52,7 +51,7 @@ CREATE TABLE type_signalement (
     urgence VARCHAR(50),
     statut  VARCHAR(50)
 );
-
+ 
 CREATE TABLE signalement (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -61,20 +60,20 @@ CREATE TABLE signalement (
     id_type_signalement INTEGER NOT NULL REFERENCES type_signalement(id),
     id_source_signalement INTEGER NOT NULL REFERENCES source_signalement(id)
 );
-
+ 
  
 CREATE TABLE type_intervention (
     id SERIAL PRIMARY KEY,
     libelle VARCHAR(100) NOT NULL
 );
-
+ 
 CREATE TABLE technicien (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(150) NOT NULL,
     id_technicien_contrat INTEGER NOT NULL REFERENCES technicien_contrat(id)
 );
  
-
+ 
 CREATE TABLE intervention (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
@@ -86,13 +85,12 @@ CREATE TABLE intervention (
     id_technicien INTEGER NOT NULL REFERENCES technicien(id),
     id_mobilier INTEGER NOT NULL REFERENCES mobilier(id)
 );
-
-
-
-
+ 
+ 
+ 
+ 
 CREATE TABLE mobilier_signalement (
     id SERIAL PRIMARY KEY,
     id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
     id_signalement INTEGER NOT NULL REFERENCES signalement(id)
 );
- 

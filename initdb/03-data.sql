@@ -78,7 +78,7 @@ SELECT
 FROM staging.fournisseurs;
  
 -- 6. mobilier
-INSERT INTO public.mobilier(id, date_installation, remarques, id_fournisseur, id_type_mobilier, id_lieu, id_etat, id_materiau)
+INSERT INTO public.mobilier(old_id, date_installation, remarques, id_fournisseur, id_type_mobilier, id_lieu, id_etat, id_materiau)
 
 
 

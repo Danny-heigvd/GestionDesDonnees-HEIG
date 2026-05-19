@@ -1,23 +1,22 @@
--- Vue 1
 CREATE VIEW v_lampadaires_detail AS
 SELECT
     m.id,
-    l.nom                                          AS lieu,
-    tm.libelle                                     AS type,
-    EXTRACT(YEAR FROM m.date_installation)         AS annee_installation,
-    COUNT(i.id)                                    AS nb_pannes,
-    SUM(i.cout)                                    AS cout_cumule,
-    MAX(i.date)                                    AS derniere_intervention,
+    l.nom AS lieu,
+    ma.libelle AS type,
+    EXTRACT(YEAR FROM m.date_installation) AS annee_installation,
+    COUNT(i.id) AS nb_pannes,
+    COALESCE(SUM(i.cout), 0) AS cout_cumule,
+    MAX(i.date) AS derniere_intervention,
     l.latitude,
     l.longitude
 FROM mobilier m
 JOIN type_mobilier tm ON tm.id = m.id_type_mobilier
-JOIN lieu          l  ON l.id  = m.id_lieu
+JOIN lieu l ON l.id = m.id_lieu
+JOIN materiau ma ON ma.id = m.id_materiau
 LEFT JOIN intervention i ON i.id_mobilier = m.id
 WHERE tm.libelle = 'lampadaire'
-GROUP BY m.id, l.nom, tm.libelle, m.date_installation, l.latitude, l.longitude;
- 
--- Vue 2
+GROUP BY m.id, l.nom, ma.libelle, m.date_installation, l.latitude, l.longitude;
+
 CREATE VIEW v_lampadaires_priorite AS
 SELECT
     id,
@@ -29,19 +28,15 @@ SELECT
     derniere_intervention,
     latitude,
     longitude,
- 
-    (COALESCE(nb_pannes, 0) * 3)
-    + (COALESCE(EXTRACT(YEAR FROM CURRENT_DATE) - annee_installation, 0) * 2)
-    + (COALESCE(cout_cumule, 0) / 100)
- 
-    AS score_priorite
- 
+    ROUND(
+        (COALESCE(nb_pannes, 0) * 3)
+        + (COALESCE(EXTRACT(YEAR FROM CURRENT_DATE) - annee_installation, 0) * 2)
+        + (COALESCE(cout_cumule, 0) / 100),
+        2
+    ) AS score_priorite
 FROM v_lampadaires_detail
- 
 ORDER BY score_priorite DESC;
- 
--- Vue 3
--- Vue 3
+
 CREATE VIEW v_lampadaires_budget AS
 WITH cout_moyen_remplacement AS (
     SELECT COALESCE(AVG(i.cout), 0) AS cout_moyen
@@ -55,21 +50,31 @@ lampadaires_avec_cumul AS (
         lp.lieu,
         lp.type,
         lp.score_priorite,
+        ROUND(cm.cout_moyen, 2) AS cout_remplacement_estime,
+        ROUND(
+            SUM(cm.cout_moyen) OVER (ORDER BY lp.score_priorite DESC),
+            2
+        ) AS budget_cumule,
         lp.latitude,
-        lp.longitude,
-        cm.cout_moyen,
-        SUM(cm.cout_moyen) OVER (ORDER BY lp.score_priorite DESC) AS budget_cumule
+        lp.longitude
     FROM v_lampadaires_priorite lp
     CROSS JOIN cout_moyen_remplacement cm
 )
-SELECT
-    id,
-    lieu,
-    type,
-    score_priorite,
-    cout_moyen AS cout_remplacement_estime,
-    budget_cumule,
-    latitude,
-    longitude
+SELECT *
 FROM lampadaires_avec_cumul
-WHERE budget_cumule <= 50000;
+WHERE budget_cumule <= 50000
+ORDER BY score_priorite DESC;
+
+SELECT * FROM v_lampadaires_detail LIMIT 20;
+
+SELECT * FROM v_lampadaires_priorite LIMIT 20;
+
+SELECT * FROM v_lampadaires_budget;
+
+SELECT *
+FROM v_lampadaires_priorite
+ORDER BY score_priorite DESC;
+
+SELECT *
+FROM v_lampadaires_detail
+WHERE nb_pannes > 0;

@@ -57,7 +57,7 @@ CREATE TABLE signalement (
     date DATE NOT NULL,
     objet VARCHAR(200),
     description VARCHAR(200),
-    id_mobilier INTEGER REFERENCES mobilier(id),
+    id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
     id_type_signalement INTEGER NOT NULL REFERENCES type_signalement(id),
     id_source_signalement INTEGER NOT NULL REFERENCES source_signalement(id)
 );
@@ -72,18 +72,18 @@ CREATE TABLE technicien (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(150) NOT NULL
 );
- 
- 
+
+
 CREATE TABLE intervention (
     id SERIAL PRIMARY KEY,
     date DATE NOT NULL,
     duree INT,
     cout DECIMAL(10,2),
     remarque VARCHAR(200),
-    id_signalement INTEGER REFERENCES signalement(id),
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
     id_type_intervention INTEGER NOT NULL REFERENCES type_intervention(id),
     id_technicien INTEGER NOT NULL REFERENCES technicien(id),
-    id_mobilier INTEGER REFERENCES mobilier(id)
+    id_mobilier INTEGER NOT NULL REFERENCES mobilier(id)
 );
  
  
@@ -95,3 +95,9 @@ CREATE TABLE mobilier_signalement (
     id_signalement INTEGER NOT NULL REFERENCES signalement(id),
     libelle VARCHAR(200)
 );
+
+CREATE INDEX idx_mobilier_type ON mobilier(id_type_mobilier);
+CREATE INDEX idx_mobilier_lieu ON mobilier(id_lieu);
+CREATE INDEX idx_intervention_mobilier ON intervention(id_mobilier);
+CREATE INDEX idx_intervention_type ON intervention(id_type_intervention);
+CREATE INDEX idx_signalement_mobilier ON signalement(id_mobilier);

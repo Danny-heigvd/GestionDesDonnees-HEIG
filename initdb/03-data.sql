@@ -227,6 +227,7 @@ LEFT JOIN public.mobilier m
     )
 WHERE ts.id IS NOT NULL
   AND ss.id IS NOT NULL
+  AND m.id IS NOT NULL
   AND st.date IS NOT NULL
   AND TRIM(st.date) <> ''
 ORDER BY st.date, st.objet, st.description, m.id;
@@ -292,6 +293,8 @@ LEFT JOIN public.technicien t
     END
 WHERE ti.id IS NOT NULL
   AND t.id IS NOT NULL
+  AND s.id IS NOT NULL
+  AND s.id_mobilier IS NOT NULL
   AND i.date IS NOT NULL
   AND TRIM(i.date) <> ''
 ORDER BY i.date, i.objet, i.type_intervention, i.technicien, i.duree, i.cout_materiel, s.id;
@@ -304,3 +307,31 @@ SELECT
 FROM public.signalement
 WHERE id_mobilier IS NOT NULL
 ORDER BY id_mobilier, id;
+
+-- Vérification du nombre de lignes
+SELECT COUNT(*) AS total_mobilier
+FROM public.mobilier;
+
+SELECT COUNT(*) AS total_signalement
+FROM public.signalement;
+
+SELECT COUNT(*) AS total_intervention
+FROM public.intervention;
+
+-- Vérification des relations manquantes
+SELECT COUNT(*) AS signalements_sans_mobilier
+FROM public.signalement
+WHERE id_mobilier IS NULL;
+
+SELECT COUNT(*) AS interventions_sans_signalement
+FROM public.intervention
+WHERE id_signalement IS NULL;
+
+SELECT COUNT(*) AS interventions_sans_mobilier
+FROM public.intervention
+WHERE id_mobilier IS NULL;
+
+SELECT column_name, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'signalement'
+  AND column_name = 'id_mobilier';

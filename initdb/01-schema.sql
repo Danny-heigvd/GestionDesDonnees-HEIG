@@ -30,15 +30,15 @@ CREATE TABLE fournisseurs (
 );
  
 CREATE TABLE mobilier (
-    id SERIAL PRIMARY KEY,
-    old_id VARCHAR(50) UNIQUE,
-    date_installation DATE,
-    remarques VARCHAR(150),
-   id_fournisseur INTEGER NOT NULL REFERENCES fournisseurs(id),
-    id_type_mobilier INTEGER NOT NULL REFERENCES type_mobilier(id),
-    id_lieu INTEGER NOT NULL REFERENCES lieu(id),
-    id_etat INTEGER NOT NULL REFERENCES etat(id),
-    id_materiau INTEGER NOT NULL REFERENCES materiau(id)
+   id SERIAL PRIMARY KEY,
+   old_id VARCHAR(50) UNIQUE,
+   date_installation DATE,
+   remarques VARCHAR(150),
+  id_fournisseur INTEGER NOT NULL REFERENCES fournisseurs(id),
+   id_type_mobilier INTEGER NOT NULL REFERENCES type_mobilier(id),
+   id_lieu INTEGER NOT NULL REFERENCES lieu(id),
+   id_etat INTEGER NOT NULL REFERENCES etat(id),
+   id_materiau INTEGER NOT NULL REFERENCES materiau(id)
 );
  
 CREATE TABLE source_signalement (
@@ -57,6 +57,7 @@ CREATE TABLE signalement (
     date DATE NOT NULL,
     objet VARCHAR(200),
     description VARCHAR(200),
+    id_mobilier INTEGER REFERENCES mobilier(id),
     id_type_signalement INTEGER NOT NULL REFERENCES type_signalement(id),
     id_source_signalement INTEGER NOT NULL REFERENCES source_signalement(id)
 );
@@ -69,8 +70,7 @@ CREATE TABLE type_intervention (
  
 CREATE TABLE technicien (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(150) NOT NULL,
-    id_technicien_contrat INTEGER NOT NULL REFERENCES technicien_contrat(id)
+    nom VARCHAR(150) NOT NULL
 );
  
  
@@ -80,10 +80,10 @@ CREATE TABLE intervention (
     duree INT,
     cout DECIMAL(10,2),
     remarque VARCHAR(200),
-    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
+    id_signalement INTEGER REFERENCES signalement(id),
     id_type_intervention INTEGER NOT NULL REFERENCES type_intervention(id),
     id_technicien INTEGER NOT NULL REFERENCES technicien(id),
-    id_mobilier INTEGER NOT NULL REFERENCES mobilier(id)
+    id_mobilier INTEGER REFERENCES mobilier(id)
 );
  
  
@@ -92,5 +92,6 @@ CREATE TABLE intervention (
 CREATE TABLE mobilier_signalement (
     id SERIAL PRIMARY KEY,
     id_mobilier INTEGER NOT NULL REFERENCES mobilier(id),
-    id_signalement INTEGER NOT NULL REFERENCES signalement(id)
+    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
+    libelle VARCHAR(200)
 );

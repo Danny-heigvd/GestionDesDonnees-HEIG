@@ -1,6 +1,3 @@
-02 : 
- 
- 
 -- Créer un schéma dédié pour la staging
 CREATE SCHEMA IF NOT EXISTS staging;
  
@@ -78,5 +75,4 @@ CREATE TABLE staging.fournisseur_inventaire (
 COPY staging.fournisseur_inventaire
 FROM '/data/fournisseur_inventaire.csv'
 WITH (FORMAT csv, HEADER true,
-      DELIMITER ';', ENCODING 'UTF8');      
- 
+      DELIMITER ';', ENCODING 'UTF8');  

@@ -16,7 +16,7 @@ JOIN lieu          l  ON l.id  = m.id_lieu
 LEFT JOIN intervention i ON i.id_mobilier = m.id
 WHERE tm.libelle = 'lampadaire'
 GROUP BY m.id, l.nom, tm.libelle, m.date_installation, l.latitude, l.longitude;
-
+ 
 -- Vue 2
 CREATE VIEW v_lampadaires_priorite AS
 SELECT
@@ -29,16 +29,22 @@ SELECT
     derniere_intervention,
     latitude,
     longitude,
-    (nb_pannes * 3)
-    + (EXTRACT(YEAR FROM CURRENT_DATE) - annee_installation) * 2
-    + (COALESCE(cout_cumule, 0) / 100) AS score_priorite
+ 
+    (COALESCE(nb_pannes, 0) * 3)
+    + (COALESCE(EXTRACT(YEAR FROM CURRENT_DATE) - annee_installation, 0) * 2)
+    + (COALESCE(cout_cumule, 0) / 100)
+ 
+    AS score_priorite
+ 
 FROM v_lampadaires_detail
+ 
 ORDER BY score_priorite DESC;
-
+ 
+-- Vue 3
 -- Vue 3
 CREATE VIEW v_lampadaires_budget AS
 WITH cout_moyen_remplacement AS (
-    SELECT AVG(i.cout) AS cout_moyen
+    SELECT COALESCE(AVG(i.cout), 0) AS cout_moyen
     FROM intervention i
     JOIN type_intervention ti ON ti.id = i.id_type_intervention
     WHERE ti.libelle = 'remplacement complet'
@@ -61,7 +67,7 @@ SELECT
     lieu,
     type,
     score_priorite,
-    cout_moyen        AS cout_remplacement_estime,
+    cout_moyen AS cout_remplacement_estime,
     budget_cumule,
     latitude,
     longitude

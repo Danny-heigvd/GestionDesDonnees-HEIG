@@ -101,3 +101,5 @@ CREATE INDEX idx_mobilier_lieu ON mobilier(id_lieu);
 CREATE INDEX idx_intervention_mobilier ON intervention(id_mobilier);
 CREATE INDEX idx_intervention_type ON intervention(id_type_intervention);
 CREATE INDEX idx_signalement_mobilier ON signalement(id_mobilier);
+CREATE INDEX idx_type_intervention_libelle
+ON type_intervention(libelle);

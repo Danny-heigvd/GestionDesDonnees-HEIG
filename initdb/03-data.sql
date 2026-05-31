@@ -92,13 +92,34 @@ INSERT INTO public.mobilier(old_id, date_installation, remarques, id_fournisseur
 SELECT DISTINCT ON (REPLACE(inv.id, '_', '-'))
     REPLACE(inv.id, '_', '-'),
     CASE
-        WHEN inv.date_installation IS NULL OR TRIM(inv.date_installation) = '' THEN NULL
-        WHEN TRIM(inv.date_installation) LIKE '%.%.%'
-            THEN TO_DATE(TRIM(inv.date_installation), 'DD.MM.YYYY')
-        WHEN TRIM(inv.date_installation) LIKE '____'
-            THEN (TRIM(inv.date_installation) || '-01-01')::DATE
-        ELSE NULL
-    END,
+    WHEN inv.date_installation IS NULL OR TRIM(inv.date_installation) = '' THEN NULL
+    WHEN TRIM(inv.date_installation) ~ '^\d{2}\.\d{2}\.\d{4}$'
+        THEN TO_DATE(TRIM(inv.date_installation), 'DD.MM.YYYY')
+    WHEN TRIM(inv.date_installation) ~ '^\d{4}-\d{2}-\d{2}$'
+        THEN TO_DATE(TRIM(inv.date_installation), 'YYYY-MM-DD')
+    WHEN TRIM(inv.date_installation) ~ '^\d{4}$'
+        THEN (TRIM(inv.date_installation) || '-01-01')::DATE
+    WHEN TRIM(inv.date_installation) ~ '^[A-Za-zÀ-ÿ]+ \d{4}$'
+        THEN (
+            '01-' ||
+            CASE SPLIT_PART(LOWER(TRIM(inv.date_installation)), ' ', 1)
+                WHEN 'janvier'   THEN '01'
+                WHEN 'février'   THEN '02'
+                WHEN 'mars'      THEN '03'
+                WHEN 'avril'     THEN '04'
+                WHEN 'mai'       THEN '05'
+                WHEN 'juin'      THEN '06'
+                WHEN 'juillet'   THEN '07'
+                WHEN 'août'      THEN '08'
+                WHEN 'septembre' THEN '09'
+                WHEN 'octobre'   THEN '10'
+                WHEN 'novembre'  THEN '11'
+                WHEN 'décembre'  THEN '12'
+            END
+            || '-' || SPLIT_PART(TRIM(inv.date_installation), ' ', 2)
+        )::DATE
+    ELSE NULL
+END,
     CASE
         WHEN inv.remarques IS NULL OR TRIM(inv.remarques) = '' THEN 'aucune'
         ELSE TRIM(inv.remarques)
@@ -181,11 +202,34 @@ FROM staging.signalements;
 INSERT INTO public.signalement(date, objet, description, id_mobilier, id_type_signalement, id_source_signalement)
 SELECT DISTINCT ON (st.date, st.objet, st.description)
     CASE
-        WHEN st.date IS NULL OR TRIM(st.date) = '' THEN NULL
-        WHEN TRIM(st.date) LIKE '%.%.%'
-            THEN TO_DATE(TRIM(st.date), 'DD.MM.YYYY')
-        ELSE TRIM(st.date)::DATE
-    END,
+    WHEN st.date IS NULL OR TRIM(st.date) = '' THEN NULL
+    WHEN TRIM(st.date) ~ '^\d{2}\.\d{2}\.\d{4}$'
+        THEN TO_DATE(TRIM(st.date), 'DD.MM.YYYY')
+    WHEN TRIM(st.date) ~ '^\d{4}-\d{2}-\d{2}$'
+        THEN TO_DATE(TRIM(st.date), 'YYYY-MM-DD')
+    WHEN TRIM(st.date) ~ '^\d{4}$'
+        THEN (TRIM(st.date) || '-01-01')::DATE
+    WHEN TRIM(st.date) ~ '^[A-Za-zÀ-ÿ]+ \d{4}$'
+        THEN (
+            '01-' ||
+            CASE SPLIT_PART(LOWER(TRIM(st.date)), ' ', 1)
+                WHEN 'janvier'   THEN '01'
+                WHEN 'février'   THEN '02'
+                WHEN 'mars'      THEN '03'
+                WHEN 'avril'     THEN '04'
+                WHEN 'mai'       THEN '05'
+                WHEN 'juin'      THEN '06'
+                WHEN 'juillet'   THEN '07'
+                WHEN 'août'      THEN '08'
+                WHEN 'septembre' THEN '09'
+                WHEN 'octobre'   THEN '10'
+                WHEN 'novembre'  THEN '11'
+                WHEN 'décembre'  THEN '12'
+            END
+            || '-' || SPLIT_PART(TRIM(st.date), ' ', 2)
+        )::DATE
+    ELSE NULL
+END,
     TRIM(st.objet),
     TRIM(st.description),
     m.id,
@@ -252,11 +296,34 @@ FROM staging.interventions;
 INSERT INTO public.intervention(date, duree, cout, remarque, id_signalement, id_type_intervention, id_technicien, id_mobilier)
 SELECT DISTINCT ON (i.date, i.objet, i.type_intervention, i.technicien, i.duree, i.cout_materiel)
     CASE
-        WHEN i.date IS NULL OR TRIM(i.date) = '' THEN NULL
-        WHEN TRIM(i.date) LIKE '%.%.%'
-            THEN TO_DATE(TRIM(i.date), 'DD.MM.YYYY')
-        ELSE TRIM(i.date)::DATE
-    END,
+    WHEN i.date IS NULL OR TRIM(i.date) = '' THEN NULL
+    WHEN TRIM(i.date) ~ '^\d{2}\.\d{2}\.\d{4}$'
+        THEN TO_DATE(TRIM(i.date), 'DD.MM.YYYY')
+    WHEN TRIM(i.date) ~ '^\d{4}-\d{2}-\d{2}$'
+        THEN TO_DATE(TRIM(i.date), 'YYYY-MM-DD')
+WHEN TRIM(i.date) ~ '^\d{4}$'
+    THEN (TRIM(i.date) || '-01-01')::DATE
+WHEN TRIM(i.date) ~ '^[A-Za-zÀ-ÿ]+ \d{4}$'
+        THEN (
+            '01-' ||
+            CASE SPLIT_PART(LOWER(TRIM(i.date)), ' ', 1)
+                WHEN 'janvier'   THEN '01'
+                WHEN 'février'   THEN '02'
+                WHEN 'mars'      THEN '03'
+                WHEN 'avril'     THEN '04'
+                WHEN 'mai'       THEN '05'
+                WHEN 'juin'      THEN '06'
+                WHEN 'juillet'   THEN '07'
+                WHEN 'août'      THEN '08'
+                WHEN 'septembre' THEN '09'
+                WHEN 'octobre'   THEN '10'
+                WHEN 'novembre'  THEN '11'
+                WHEN 'décembre'  THEN '12'
+            END
+            || '-' || SPLIT_PART(TRIM(i.date), ' ', 2)
+        )::DATE
+    ELSE NULL
+END,
     CASE
         WHEN i.duree = '30 min' THEN 30
         WHEN i.duree = '1h' THEN 60
@@ -307,31 +374,3 @@ SELECT
 FROM public.signalement
 WHERE id_mobilier IS NOT NULL
 ORDER BY id_mobilier, id;
-
--- Vérification du nombre de lignes
-SELECT COUNT(*) AS total_mobilier
-FROM public.mobilier;
-
-SELECT COUNT(*) AS total_signalement
-FROM public.signalement;
-
-SELECT COUNT(*) AS total_intervention
-FROM public.intervention;
-
--- Vérification des relations manquantes
-SELECT COUNT(*) AS signalements_sans_mobilier
-FROM public.signalement
-WHERE id_mobilier IS NULL;
-
-SELECT COUNT(*) AS interventions_sans_signalement
-FROM public.intervention
-WHERE id_signalement IS NULL;
-
-SELECT COUNT(*) AS interventions_sans_mobilier
-FROM public.intervention
-WHERE id_mobilier IS NULL;
-
-SELECT column_name, is_nullable
-FROM information_schema.columns
-WHERE table_name = 'signalement'
-  AND column_name = 'id_mobilier';

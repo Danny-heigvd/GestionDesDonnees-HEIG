@@ -13,3 +13,7 @@ Les coûts ont été nettoyés pour obtenir des valeurs numériques. Les mention
 Les signalements et interventions ne contenaient pas toujours directement l’identifiant du mobilier. Un rapprochement a donc été fait à partir du texte de l’objet, en utilisant le type de mobilier et le lieu lorsque c’était possible. Les lignes sans correspondance fiable ont été exclues afin d’éviter de créer de fausses relations.
 
 Ces choix permettent d’obtenir une base plus cohérente pour produire les trois vues demandées : la fiche des lampadaires, le classement par priorité et la sélection dans le budget de CHF 50’000.
+
+Réponse a la problématique
+
+Le classement repose sur trois critères pondérés : le nombre de pannes (× 3) comme facteur dominant de fiabilité, l'âge en années (× 2) pour anticiper les défaillances futures, et le coût cumulé des interventions (/ 100) pour affiner le classement. Les lampadaires sans date d'installation se voient attribuer un âge conventionnel de 30 ans. Le budget de CHF 50 000.— permet de remplacer la totalité des 35 lampadaires recensés pour un coût estimé de CHF 5 139.62.—, avec priorité aux lampadaires 31 et 24 qui concentrent le plus de pannes et de coûts. Le solde de CHF 44 860.— pourrait être alloué à d'autres types de mobilier urbain.

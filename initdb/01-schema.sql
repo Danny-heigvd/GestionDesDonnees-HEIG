@@ -80,10 +80,10 @@ CREATE TABLE intervention (
     duree INT,
     cout DECIMAL(10,2),
     remarque VARCHAR(200),
-    id_signalement INTEGER NOT NULL REFERENCES signalement(id),
+    id_signalement INTEGER REFERENCES signalement(id),
     id_type_intervention INTEGER NOT NULL REFERENCES type_intervention(id),
     id_technicien INTEGER NOT NULL REFERENCES technicien(id),
-    id_mobilier INTEGER NOT NULL REFERENCES mobilier(id)
+    id_mobilier INTEGER REFERENCES mobilier(id)  -- <-- changer ici uniquement
 );
  
  

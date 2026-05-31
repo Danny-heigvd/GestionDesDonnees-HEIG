@@ -189,3 +189,36 @@ WHERE tm.libelle = 'lampadaire'
 GROUP BY m.id, vd.nb_pannes
 ORDER BY coherence DESC;
 -- Attendu : toutes les lignes à ✅ OK
+
+SELECT 
+    COUNT(*) AS nb_remplacements,
+    ROUND(AVG(cout), 2) AS cout_moyen,
+    MIN(cout) AS cout_min,
+    MAX(cout) AS cout_max,
+    SUM(cout) AS cout_total
+FROM intervention i
+JOIN type_intervention ti ON ti.id = i.id_type_intervention
+WHERE LOWER(TRIM(ti.libelle)) = 'remplacement complet';
+
+SELECT cout_materiel, COUNT(*) AS nb
+FROM staging.interventions
+WHERE LOWER(TRIM(type_intervention)) = 'remplacement complet'
+GROUP BY cout_materiel
+ORDER BY nb DESC;
+
+SELECT i.objet, i.type_intervention, i.cout_materiel
+FROM staging.interventions i
+WHERE LOWER(TRIM(i.type_intervention)) = 'remplacement complet'
+  AND NOT EXISTS (
+    SELECT 1 FROM public.signalement s
+    WHERE s.objet = i.objet
+  );
+
+SELECT objet, date, urgence, statut
+FROM staging.signalements
+WHERE objet IN (
+    'lampadaire Place de la Gare',
+    'lampadaire sodium Rue du Casino',
+    'lampadaire led Avenue des Sports',
+    'lampadaire LED Chemin de Maillefer'
+);

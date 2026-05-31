@@ -344,10 +344,12 @@ END,
     s.id,
     ti.id,
     t.id,
-    s.id_mobilier
+    m.id
 FROM staging.interventions i
 LEFT JOIN public.signalement s
     ON s.objet = i.objet
+LEFT JOIN public.mobilier m
+    ON m.id = s.id_mobilier
 LEFT JOIN public.type_intervention ti
     ON ti.libelle = CASE
         WHEN i.type_intervention IS NULL OR TRIM(i.type_intervention) = '' THEN 'inconnu'
@@ -360,10 +362,9 @@ LEFT JOIN public.technicien t
     END
 WHERE ti.id IS NOT NULL
   AND t.id IS NOT NULL
-  AND s.id IS NOT NULL
-  AND s.id_mobilier IS NOT NULL
   AND i.date IS NOT NULL
   AND TRIM(i.date) <> ''
+  AND m.id IS NOT NULL
 ORDER BY i.date, i.objet, i.type_intervention, i.technicien, i.duree, i.cout_materiel, s.id;
  
 INSERT INTO public.mobilier_signalement(id_mobilier, id_signalement, libelle)
